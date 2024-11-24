@@ -1,0 +1,14 @@
+package org.example.web_eng2.repository;
+
+import org.example.web_eng2.Building;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+
+public interface BuildingRepository extends JpaRepository<Building, String> {
+
+
+    List<Building> findByDeletedAtIsNull();
+
+    List<Building> findAll();
+}
