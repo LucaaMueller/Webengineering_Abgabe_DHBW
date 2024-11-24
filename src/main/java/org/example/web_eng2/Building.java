@@ -2,37 +2,101 @@ package org.example.web_eng2;
 
 import jakarta.persistence.*;
 
+@Entity
+@Table(name = "buildings")
 
-    @Entity
-    @Table(name = "buildings")
-    public class Building {
-        @Id
-        @GeneratedValue
+public class Building {
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private String id;
 
-        @Column(name = "id")
-        private String id;
+    @Column(name = "name")
+    private String name;
 
+    @Column(name = "streetname")
+    private String streetname;
 
-        @Column(name = "name")
-        private String name;
+    @Column(name = "housenumber")
+    private String housenumber;
 
-        @Column(name = "streetname")
-        private String streetname;
+    @Column(name = "country_code")
+    private String countryCode;
 
-        @Column(name = "housenumber")
-        private String housenumber;
+    @Column(name = "postalcode")
+    private String postalcode;
 
-        @Column(name = "country_code")
-        private String countryCode;
+    @Column(name = "city")
+    private String city;
 
-        @Column(name = "postalcode")
-        private String postalcode;
+    @Column(name = "deleted_at")
+    private String deletedAt;
 
-        @Column(name = "city")
-        private String city;
+    // Getter und Setter
+    public String getId() {
+        return id;
+    }
 
-        @Column(name = "deleted_at")
-        private String deletedAt;
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getStreetname() {
+        return streetname;
+    }
+
+    public void setStreetname(String streetname) {
+        this.streetname = streetname;
+    }
+
+    public String getHousenumber() {
+        return housenumber;
+    }
+
+    public void setHousenumber(String housenumber) {
+        this.housenumber = housenumber;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getPostalcode() {
+        return postalcode;
+    }
+
+    public void setPostalcode(String postalcode) {
+        this.postalcode = postalcode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
 
 
 }
