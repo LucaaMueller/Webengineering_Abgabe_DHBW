@@ -1,7 +1,5 @@
 package org.example.web_eng2;
 
-
-
 import org.example.web_eng2.repository.BuildingRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,4 +20,13 @@ public class BuildingService {
         }
         return buildingRepository.findByDeletedAtIsNull();
     }
+
+    public Building save(Building building) {
+        return buildingRepository.save(building);
+    }
+
+    public Building saveBuilding(Building building) {
+        return buildingRepository.save(building);
+    }
+
 }

@@ -2,16 +2,10 @@ package org.example.web_eng2.repository;
 
 import org.example.web_eng2.Building;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
-
-@Repository
-public interface BuildingRepository extends JpaRepository<Building, String> {
-
-
+public interface BuildingRepository extends JpaRepository<Building, UUID> {
     List<Building> findByDeletedAtIsNull();
-
-    List<Building> findAll();
 }

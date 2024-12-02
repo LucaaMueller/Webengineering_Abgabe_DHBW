@@ -1,43 +1,53 @@
 package org.example.web_eng2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "buildings")
-
 public class Building {
     @Id
     @GeneratedValue
-    @Column(name = "id")
-    private String id;
+    @JsonProperty("id")
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
 
-    @Column(name = "name")
+    @JsonProperty("name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "streetname")
+    @JsonProperty("streetname")
+    @Column(name = "streetname", nullable = false)
     private String streetname;
 
-    @Column(name = "housenumber")
+    @JsonProperty("housenumber")
+    @Column(name = "housenumber", nullable = false)
     private String housenumber;
 
-    @Column(name = "country_code")
+    @JsonProperty("country_code")
+    @Column(name = "country_code", nullable = false)
     private String countryCode;
 
-    @Column(name = "postalcode")
+    @JsonProperty("postalcode")
+    @Column(name = "postalcode", nullable = false)
     private String postalcode;
 
-    @Column(name = "city")
+    @JsonProperty("city")
+    @Column(name = "city", nullable = false)
     private String city;
 
+    @JsonProperty("deleted_at")
     @Column(name = "deleted_at")
-    private String deletedAt;
+    private OffsetDateTime deletedAt;
 
     // Getter und Setter
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -69,7 +79,7 @@ public class Building {
         return countryCode;
     }
 
-    public void setCountryCode(String countryCode) {
+    public void setcountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
 
@@ -89,14 +99,11 @@ public class Building {
         this.city = city;
     }
 
-    public String getDeletedAt() {
+    public OffsetDateTime getDeletedAt() {
         return deletedAt;
     }
 
-    public void setDeletedAt(String deletedAt) {
+    public void setDeletedAt(OffsetDateTime deletedAt) {
         this.deletedAt = deletedAt;
     }
-
-
-
 }
