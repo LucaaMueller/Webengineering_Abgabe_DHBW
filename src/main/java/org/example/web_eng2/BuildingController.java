@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-
 @RestController
 @RequestMapping("/api/v3/assets/buildings")
 public class BuildingController {
@@ -86,5 +85,28 @@ public class BuildingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-}
 
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteBuilding(
+            @PathVariable UUID id,
+            @RequestParam(value = "permanent", defaultValue = "false") boolean permanent) {
+        try {
+            return buildingRepository.findById(id)
+                    .map(building -> {
+                        if (permanent) {
+                            buildingRepository.delete(building);
+                            return ResponseEntity.noContent().build();
+                        } else {
+                            building.setDeletedAt(java.time.OffsetDateTime.now());
+                            buildingRepository.save(building);
+                            return ResponseEntity.noContent().build();
+                        }
+                    })
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+}
