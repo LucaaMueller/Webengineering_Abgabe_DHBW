@@ -67,16 +67,8 @@ public class StoreyController {
         }
     }
 
-   /* @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_manage-account')")
-    public ResponseEntity<?> deleteStorey(@PathVariable UUID id) {
-        try {
-            storeyService.deleteStorey(id);
-            return ResponseEntity.ok("Storey deleted successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
-    }*/
+
+
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_manage-account')")

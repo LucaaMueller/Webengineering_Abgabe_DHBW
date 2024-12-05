@@ -35,6 +35,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v3/assets/buildings/**").hasAuthority("ROLE_manage-account") // Nur Benutzer mit "manage-account" können POST ausführen
                         .requestMatchers(HttpMethod.GET, "/api/v3/assets/storeys/**").permitAll() // GET-Anfragen erlauben
                         .requestMatchers(HttpMethod.POST, "/api/v3/assets/storeys/**").hasAuthority("ROLE_manage-account") // Nur Benutzer mit "manage-account" können POST ausführen
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/rooms/**").permitAll() // GET-Anfragen erlauben
+                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/rooms/**").hasAuthority("ROLE_manage-account") // Nur Benutzer mit "manage-account" können POST ausf��hren
                         .anyRequest().authenticated() // Alle anderen Endpunkte erfordern Authentifizierung
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
