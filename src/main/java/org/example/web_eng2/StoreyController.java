@@ -31,14 +31,31 @@ public class StoreyController {
         this.storeyRepository = storeyRepository;
         this.buildingRepository = buildingRepository;
     }
-
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_view-profile')")
-    public ResponseEntity<List<Map<String, Object>>> getAllStoreys(
-            @RequestParam(value = "include_deleted", defaultValue = "false") boolean includeDeleted) {
-        List<Storey> storeys = storeyService.getAllStoreys(includeDeleted);
+    public ResponseEntity<Map<String, Object>> getAllStoreys(
+            @RequestParam(value = "include_deleted", defaultValue = "false") boolean includeDeleted,
+            @RequestParam(value = "building_id", required = false) UUID buildingId) {
+        // Abrufen aller Storeys
+        List<Storey> allStoreys = storeyRepository.findAll();
 
-        List<Map<String, Object>> response = storeys.stream().map(storey -> {
+        // Filterung basierend auf "building_id", wenn angegeben
+        if (buildingId != null) {
+            allStoreys = allStoreys.stream()
+                    .filter(storey -> storey.getBuilding().getId().equals(buildingId))
+                    .toList();
+            System.out.println("Filtered by building_id: " + buildingId);
+        }
+
+        // Filterung basierend auf "include_deleted"
+        List<Storey> filteredStoreys = includeDeleted
+                ? allStoreys
+                : allStoreys.stream()
+                .filter(storey -> storey.getDeletedAt() == null)
+                .toList();
+
+        // Storeys in die gewünschte Struktur umwandeln
+        List<Map<String, Object>> storeyList = filteredStoreys.stream().map(storey -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", storey.getId());
             map.put("name", storey.getName());
@@ -47,6 +64,11 @@ public class StoreyController {
             return map;
         }).toList();
 
+        // Antwort erstellen
+        Map<String, Object> response = new HashMap<>();
+        response.put("storeys", storeyList);
+        response.put("total_unfiltered", Double.valueOf(allStoreys.size())); // Ungefilterte Gesamtanzahl als Double
+
         return ResponseEntity.ok(response);
     }
 
@@ -54,20 +76,48 @@ public class StoreyController {
     @PreAuthorize("hasAuthority('ROLE_manage-account')")
     public ResponseEntity<?> createStorey(@RequestBody Map<String, Object> payload) {
         try {
+            // Eingabedaten validieren
             String name = (String) payload.get("name");
             UUID buildingId = UUID.fromString((String) payload.get("building_id"));
 
-            Storey storey = storeyService.createStorey(name, buildingId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(storey);
+            // Überprüfen, ob das Gebäude existiert
+            Optional<Building> buildingOptional = buildingRepository.findById(buildingId);
+            if (buildingOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Building not found", "message", "The specified building does not exist"));
+            }
+
+            // Überprüfen, ob das Gebäude gelöscht wurde
+            Building building = buildingOptional.get();
+            if (building.getDeletedAt() != null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Building is deleted", "message", "Cannot create a storey for a deleted building"));
+            }
+
+            // Storey erstellen
+            Storey storey = new Storey();
+            storey.setName(name);
+            storey.setBuilding(building);
+
+            Storey savedStorey = storeyRepository.save(storey);
+
+            // Erfolgsantwort
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", savedStorey.getId());
+            response.put("name", savedStorey.getName());
+            response.put("building_id", savedStorey.getBuilding().getId());
+            response.put("deleted_at", savedStorey.getDeletedAt());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid input", "message", e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Server error", "message", "An unexpected error occurred"));
         }
     }
-
-
 
 
     @PutMapping("/{id}")

@@ -1,5 +1,7 @@
 package org.example.web_eng2;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,40 +34,56 @@ public class SecurityConfig {
                 .cors()
                 .and()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/buildings/**").permitAll() // GET-Anfragen erlauben
-                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/buildings/**").hasAuthority("ROLE_manage-account") // Nur Benutzer mit "manage-account" können POST ausführen
-                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/storeys/**").permitAll() // GET-Anfragen erlauben
-                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/storeys/**").hasAuthority("ROLE_manage-account") // Nur Benutzer mit "manage-account" können POST ausführen
-                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/rooms/**").permitAll() // GET-Anfragen erlauben
-                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/rooms/**").hasAuthority("ROLE_manage-account") // Nur Benutzer mit "manage-account" können POST ausf��hren
-                        .anyRequest().authenticated() // Alle anderen Endpunkte erfordern Authentifizierung
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/status").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/health/live").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/health/ready").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/buildings").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/buildings/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/buildings/**").hasAuthority("ROLE_manage-account")
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/storeys/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/storeys/**").hasAuthority("ROLE_manage-account")
+                        .requestMatchers(HttpMethod.GET, "/api/v3/assets/rooms/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v3/assets/rooms/**").hasAuthority("ROLE_manage-account")
+                        .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())) // JWT-Authentifizierung
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-                .csrf().disable(); // CSRF deaktivieren, wenn nicht notwendig (z. B. bei REST APIs)
+                .csrf().disable()
+                .exceptionHandling()
+                // Fehlerbehandlung für 401 Unauthorized
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"You do not have the required roles to access this resource.\"}");
+                })
+                // Fehlerbehandlung für 403 Forbidden
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"Access to this resource is denied.\"}");
+                });
 
         return http.build();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        // Verwendet die Zertifikate vom Identity Provider (z. B. Keycloak)
         return NimbusJwtDecoder.withJwkSetUri("http://localhost:9090/auth/realms/biletado/protocol/openid-connect/certs")
                 .build();
     }
 
     @Bean
     public CorsFilter corsFilter() {
-        // Konfiguration für Cross-Origin Resource Sharing (CORS)
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:9090")); // Erlaubt das Frontend
+        config.setAllowedOrigins(List.of("http://localhost:9090"));
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
         source.registerCorsConfiguration("/**", config);
+
         return new CorsFilter(source);
     }
 

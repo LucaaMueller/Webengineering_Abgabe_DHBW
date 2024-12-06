@@ -1,7 +1,10 @@
 package org.example.web_eng2;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+
+import java.sql.Date;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -39,6 +42,7 @@ public class Building {
     private String city;
 
     @JsonProperty("deleted_at")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
