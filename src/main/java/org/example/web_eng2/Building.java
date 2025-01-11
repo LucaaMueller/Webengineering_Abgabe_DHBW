@@ -12,10 +12,9 @@ import java.util.UUID;
 @Table(name = "buildings")
 public class Building {
     @Id
-    @GeneratedValue
     @JsonProperty("id")
-    @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    @Column(name = "id", nullable = false)
+    private UUID id = UUID.randomUUID();
 
     @JsonProperty("name")
     @Column(name = "name", nullable = false)
