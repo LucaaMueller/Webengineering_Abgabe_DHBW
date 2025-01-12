@@ -11,6 +11,39 @@ Vor dem Starten des Projekts müssen folgende Schritte durchgeführt werden:
 4. Für Datenbankverbindung:
 
 ```bash
-   kubectl port-forward services/postgres 5432:5432 
+   kubectl port-forward services/postgres 5432:5432
+```
 
+Docker/Podman Image
+Das Image meiner Anwendung ist in GitHub Packages verfügbar.
+
+Image Details
+Registry: ghcr.io
+Repository: lucaamueller/webengeneering_abgabe_dhbw
+Tag: v1
+
+Container starten
+Laden Sie das Image herunter:
+
+```bash
+   podman pull ghcr.io/lucaamueller/webengeneering_abgabe_dhbw:v1
+```
+
+
+Starten Sie den Container:
+
+```bash
+   podman run -d --name webeng_container -p 8080:8080 ghcr.io/lucaamueller/webengeneering_abgabe_dhbw:v1
+```
+
+
+Stellen Sie sicher, dass der Container läuft:
+
+```bash
+   podman ps
+```
+
+
+Greifen Sie auf die Anwendung zu:
+Öffnen Sie einen Browser und navigieren Sie zu: http://localhost:8080
 
