@@ -1,4 +1,5 @@
-name: Java CI
+
+name: Java CI with Tests
 
 on:
   push:
@@ -12,6 +13,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: assets_v3
+
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/assets_v3
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_SECURITY_ENABLED: false
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -22,9 +40,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set execute permisson for Maven Wrapper
+      - name: Set execute permission for Maven Wrapper
         run: chmod +x ./mvnw
 
+      - name: Run Tests
+        run: ./mvnw test -Dspring.profiles.active=ci
 
-      - name: Build with Maven
-        run: ./mvnw test
+      - name: Upload Surefire Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
