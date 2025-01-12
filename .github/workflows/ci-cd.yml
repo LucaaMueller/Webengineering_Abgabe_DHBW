@@ -30,43 +30,34 @@ jobs:
       SPRING_SECURITY_ENABLED: false
 
     steps:
-      # 1. Checkout Code
+      # 1. Code aus dem Repository holen
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. JDK einrichten
+      # 2. JDK für Spring Boot einrichten
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      # 3. Ausführungsrechte für Maven Wrapper setzen
-      - name: Set execute permission for Maven Wrapper
-        run: chmod +x ./mvnw
+      # 3. Maven Build ausführen
+      - name: Build Project with Maven
+        run: ./mvnw clean package -DskipTests=true
 
-      # 4. Maven Tests ausführen
-      - name: Run Maven Tests
-        run: ./mvnw test -Dspring.profiles.active=ci
+      # 4. Maven Tests ausführen (optional)
+      - name: Run Tests
+        run: ./mvnw test
 
-      # 5. Docker Image bauen (optional)
-      - name: Build Docker Image
-        run: docker build -t ghcr.io/lucaamueller/webeng2_abgabe_luca_jan:latest .
-
-      # 6. Docker Image pushen (optional)
-      - name: Push Docker Image to GHCR
-        uses: docker/login-action@v2
+      # 5. Deployment-Schritt (Beispiel für SSH-Zugriff auf einen Server)
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v0.1.6
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push Image
-        run: docker push ghcr.io/lucaamueller/webeng2_abgabe_luca_jan:latest
-
-      # 7. Surefire-Reports hochladen
-      - name: Upload Surefire Reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: surefire-reports
-          path: target/surefire-reports/
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          script: |
+            cd /path/to/deployment
+            rm -rf *
+            cp /path/to/built-jar/application.jar .
+            java -jar application.jar
