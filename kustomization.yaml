@@ -33,6 +33,8 @@ patches:
             value: assets_v3
           - name: KEYCLOAK_HOST
             value: keycloak
+          - name: KEYCLOAK_PORT
+            value: "8080"
           - name: KEYCLOAK_REALM
             value: biletado
           - name: RESERVATIONS_API_HOST
