@@ -41,23 +41,22 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 3. Maven Build ausführen
+      # 3. Berechtigung für Maven Wrapper setzen
+      - name: Set execute permission for Maven Wrapper
+        run: chmod +x ./mvnw
+
+      # 4. Debugging: Berechtigungen prüfen
+      - name: Debug File Permissions
+        run: ls -l ./mvnw
+
+      # 5. Debugging: Maven Wrapper überprüfen
+      - name: Verify Maven Wrapper
+        run: file ./mvnw
+
+      # 6. Maven Build ausführen
       - name: Build Project with Maven
         run: ./mvnw clean package -DskipTests=true
 
-      # 4. Maven Tests ausführen (optional)
+      # 7. Maven Tests ausführen (optional)
       - name: Run Tests
         run: ./mvnw test
-
-      # 5. Deployment-Schritt (Beispiel für SSH-Zugriff auf einen Server)
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_PASSWORD }}
-          script: |
-            cd /path/to/deployment
-            rm -rf *
-            cp /path/to/built-jar/application.jar .
-            java -jar application.jar
