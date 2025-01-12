@@ -45,10 +45,18 @@ jobs:
       - name: Set execute permission for Maven Wrapper
         run: chmod +x ./mvnw
 
-      # 4. Maven Build ausführen
+      # 4. Debugging: Berechtigungen prüfen
+      - name: Debug File Permissions
+        run: ls -l ./mvnw
+
+      # 5. Debugging: Maven Wrapper überprüfen
+      - name: Verify Maven Wrapper
+        run: file ./mvnw
+
+      # 6. Maven Build ausführen
       - name: Build Project with Maven
         run: ./mvnw clean package -DskipTests=true
 
-      # 5. Maven Tests ausführen (optional)
+      # 7. Maven Tests ausführen (optional)
       - name: Run Tests
         run: ./mvnw test
