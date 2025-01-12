@@ -27,16 +27,22 @@ Laden Sie das Image herunter:
 
 ```bash
    podman pull ghcr.io/lucaamueller/webengeneering_abgabe_dhbw:v1
+```
+
 
 Starten Sie den Container:
 
 ```bash
    podman run -d --name webeng_container -p 8080:8080 ghcr.io/lucaamueller/webengeneering_abgabe_dhbw:v1
+```
+
 
 Stellen Sie sicher, dass der Container läuft:
 
 ```bash
    podman ps
+```
+
 
 Greifen Sie auf die Anwendung zu:
 Öffnen Sie einen Browser und navigieren Sie zu: http://localhost:8080
