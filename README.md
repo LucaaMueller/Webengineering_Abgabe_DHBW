@@ -12,6 +12,7 @@ Vor dem Starten des Projekts müssen folgende Schritte durchgeführt werden:
 
 ```bash
    kubectl port-forward services/postgres 5432:5432
+```
 
 Docker/Podman Image
 Das Image meiner Anwendung ist in GitHub Packages verfügbar.
