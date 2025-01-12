@@ -33,12 +33,11 @@ public class BuildingController {
     public ResponseEntity<Map<String, Object>> getAllBuildings(
             @RequestParam(value = "include_deleted", defaultValue = "false") boolean includeDeleted,
             HttpServletRequest request) {
+        logger.info("GET /buildings - include_deleted={}, requested by User: {}", includeDeleted, request.getRemoteUser());
         try {
             List<Building> buildings = includeDeleted
                     ? buildingRepository.findAll()
                     : buildingRepository.findByDeletedAtIsNull();
-
-            logger.info("GET /buildings - include_deleted={}, requested by User: {}", includeDeleted, request.getRemoteUser());
 
             Map<String, Object> response = new HashMap<>();
             response.put("buildings", buildings);
@@ -51,13 +50,14 @@ public class BuildingController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_manage-account')")
-    public ResponseEntity<Building> createBuilding(@Valid @RequestBody Building building, HttpServletRequest request) {
+    public ResponseEntity<Building> createBuilding(@RequestBody Building building, HttpServletRequest request) {
+        logger.info("POST /buildings - Requested by User: {}", request.getRemoteUser());
         try {
             Building savedBuilding = buildingRepository.save(building);
 
-            logger.info("POST /buildings - Created Building with ID: {}, requested by User: {}", savedBuilding.getId(), request.getRemoteUser());
-
             String location = request.getRequestURL().toString() + "/" + savedBuilding.getId();
+            logger.info("POST /buildings - Created Building with ID: {}", savedBuilding.getId());
+
             return ResponseEntity.status(HttpStatus.CREATED).header("Location", location).body(savedBuilding);
         } catch (Exception e) {
             logger.error("POST /buildings failed", e);
@@ -67,9 +67,8 @@ public class BuildingController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Building> getBuildingById(@PathVariable UUID id, HttpServletRequest request) {
+        logger.info("GET /buildings/{} - Requested by User: {}", id, request.getRemoteUser());
         try {
-            logger.info("GET /buildings/{} - requested by User: {}", id, request.getRemoteUser());
-
             return buildingRepository.findById(id)
                     .map(building -> ResponseEntity.ok(building))
                     .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -82,7 +81,8 @@ public class BuildingController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_manage-account')")
     public ResponseEntity<?> updateOrCreateBuilding(
-            @PathVariable String id, @Valid @RequestBody Building inputBuilding, HttpServletRequest request) {
+            @PathVariable String id, @RequestBody Building inputBuilding, HttpServletRequest request) {
+        logger.info("PUT /buildings/{} - Requested by User: {}", id, request.getRemoteUser());
         try {
             UUID uuid = UUID.fromString(id);
             Optional<Building> optionalBuilding = buildingRepository.findById(uuid);
@@ -105,7 +105,7 @@ public class BuildingController {
                         .buildAndExpand(newBuilding.getId())
                         .toUri();
 
-                logger.info("PUT /buildings/{} - Created new Building, requested by User: {}", id, request.getRemoteUser());
+                logger.info("PUT /buildings/{} - Created new Building", id);
 
                 return ResponseEntity.created(location).body(newBuilding);
             } else {
@@ -123,7 +123,7 @@ public class BuildingController {
 
                 buildingRepository.save(existingBuilding);
 
-                logger.info("PUT /buildings/{} - Updated existing Building, requested by User: {}", id, request.getRemoteUser());
+                logger.info("PUT /buildings/{} - Updated existing Building", id);
 
                 return ResponseEntity.ok(existingBuilding);
             }
@@ -139,12 +139,13 @@ public class BuildingController {
             @PathVariable UUID id,
             @RequestParam(value = "permanent", defaultValue = "false") boolean permanent,
             HttpServletRequest request) {
+        logger.info("DELETE /buildings/{} - Requested by User: {}, Permanent: {}", id, request.getRemoteUser(), permanent);
         try {
             return buildingRepository.findById(id)
                     .map(building -> {
                         List<Storey> activeStoreys = storeyRepository.findByBuildingAndDeletedAtIsNull(building);
                         if (!activeStoreys.isEmpty()) {
-                            logger.warn("DELETE /buildings/{} - Attempt to delete Building with active storeys, requested by User: {}", id, request.getRemoteUser());
+                            logger.warn("DELETE /buildings/{} - Attempt to delete Building with active storeys", id);
                             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                     .body(Map.of(
                                             "error", "Building has active storeys",
@@ -154,17 +155,17 @@ public class BuildingController {
 
                         if (permanent) {
                             buildingRepository.delete(building);
-                            logger.info("DELETE /buildings/{} - Permanently deleted, requested by User: {}", id, request.getRemoteUser());
+                            logger.info("DELETE /buildings/{} - Permanently deleted", id);
                             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
                         } else {
                             building.setDeletedAt(java.time.OffsetDateTime.now());
                             buildingRepository.save(building);
-                            logger.info("DELETE /buildings/{} - Soft-deleted, requested by User: {}", id, request.getRemoteUser());
+                            logger.info("DELETE /buildings/{} - Soft-deleted", id);
                             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
                         }
                     })
                     .orElseGet(() -> {
-                        logger.warn("DELETE /buildings/{} - Building not found, requested by User: {}", id, request.getRemoteUser());
+                        logger.warn("DELETE /buildings/{} - Building not found", id);
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body(Map.of(
                                         "error", "Building not found",
