@@ -14,9 +14,28 @@ patches:
         value: ghcr.io/lucaamueller/webeng2_abgabe_luca_jan:latest
       - op: replace
         path: /spec/template/spec/containers/0/ports/0/containerPort
-        value: 8080 # Ändere dies, falls dein Container einen anderen Port verwendet
+        value: 8080
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
+      - op: replace
+        path: /spec/template/spec/containers/0/env
+        value:
+          - name: POSTGRES_ASSETS_HOST
+            value: postgres
+          - name: POSTGRES_ASSETS_PORT
+            value: "5432"
+          - name: POSTGRES_ASSETS_USER
+            value: postgres
+          - name: POSTGRES_ASSETS_PASSWORD
+            value: postgres
+          - name: POSTGRES_ASSETS_DBNAME
+            value: assets_v3
+          - name: KEYCLOAK_HOST
+            value: keycloak
+          - name: KEYCLOAK_REALM
+            value: biletado
+          - name: RESERVATIONS_API_HOST
+            value: http://reservations
 
 namespace: biletado
