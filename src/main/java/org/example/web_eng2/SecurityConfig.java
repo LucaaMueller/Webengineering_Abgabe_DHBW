@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v3/assets/storeys/**").hasAuthority("ROLE_manage-account")
                         .requestMatchers(HttpMethod.GET, "/api/v3/assets/rooms/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v3/assets/rooms/**").hasAuthority("ROLE_manage-account")
+
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

@@ -1,5 +1,6 @@
 package org.example.web_eng2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.util.UUID;
 import java.time.Instant;
@@ -10,8 +11,10 @@ import java.time.Instant;
 public class Room {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @JsonProperty("id")
+    @Column(name = "id", nullable = false)
+    private UUID id = UUID.randomUUID();
+
 
     @Column(name = "name")
     private String name;

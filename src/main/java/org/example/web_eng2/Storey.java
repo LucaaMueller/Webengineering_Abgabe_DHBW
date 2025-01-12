@@ -1,5 +1,6 @@
 package org.example.web_eng2;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.util.UUID;
 
@@ -8,8 +9,14 @@ import java.util.UUID;
 public class Storey {
 
     @Id
+    @JsonProperty("id")
+    @Column(name = "id", nullable = false)
+    private UUID id = UUID.randomUUID();
+
+
+    /*@Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    private UUID id;*/
 
     @Column(nullable = false)
     private String name;
