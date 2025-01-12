@@ -85,16 +85,22 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - https://gitlab.com/biletado/kustomize.git//overlays/kind
+  - https://gitlab.com/biletado/kustomize.git//overlays/kind?ref=main
 
 patches:
-  - patch: |-
+  - target:
+      kind: Deployment
+      name: assets
+    patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: ghcr.io/lucaamueller/webengeneering_abgabe_dhbw:latest
+        value: ghcr.io/lucaamueller/webeng2_abgabe_luca_jan:latest
       - op: replace
         path: /spec/template/spec/containers/0/ports/0/containerPort
         value: 8080
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
       - op: replace
         path: /spec/template/spec/containers/0/env
         value:
@@ -108,13 +114,17 @@ patches:
             value: postgres
           - name: POSTGRES_ASSETS_DBNAME
             value: assets_v3
-          - name: KEYCLOAK_REALM
-            value: biletado
           - name: KEYCLOAK_HOST
             value: keycloak
           - name: KEYCLOAK_PORT
             value: "8080"
-```
+          - name: KEYCLOAK_REALM
+            value: biletado
+          - name: RESERVATIONS_API_HOST
+            value: http://reservations
+
+namespace: biletado
+
 
 ### Schritt 1: Hochfahren des originalen Biletado-Clusters
 Führen Sie folgende Befehle aus:
@@ -133,5 +143,7 @@ kubectl apply -k . --prune -l app.kubernetes.io/part-of=biletado -n biletado
 kubectl wait pods -n biletado -l app.kubernetes.io/part-of=biletado --for condition=Ready --timeout=120s
 ```
 
+##Automatisierte Tests und CI CD Pipeline
 
+sind beide unter dem Ordner .github/workflows zu finden
 
